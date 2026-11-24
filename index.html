@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="GI-ECR-24DC: our own 24 V DC PLC for the DIN rail. Five boards, every copper layer, all schematics, exploded 3D view, safety and protection.">
+<title>GI-ECR-24DC</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: product page in the manner of a hardware launch page — full-bleed black bands, centred 1080 px column,
+   oversized display type, the boards themselves as the hero objects; copper-coloured accent taken from the board's own copper. */
+:root{
+  --bg:#000;            /* page */
+  --band:#0b0c0f;       /* raised band, same as the copper renders' ground */
+  --card:#141518;       /* tiles */
+  --line:#24262b;       /* hairlines */
+  --fg:#f5f5f7;         /* text */
+  --mute:#9a9ca3;       /* secondary text */
+  --copper:#d9a35b;     /* accent: copper */
+  --copper-hi:#f3d3a1;  /* accent highlight */
+  --ok:#5fd38a;         /* state: passes */
+  --warn:#e8b04a;       /* state: accepted risk */
+  --display:"Inter Tight","SF Pro Display",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --text:"Inter","SF Pro Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:400 17px/1.55 var(--text);-webkit-font-smoothing:antialiased;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:rgba(0,0,0,.8)}
+img{max-width:100%;display:block}
+a{color:var(--copper-hi);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--copper);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.band{padding-block:clamp(64px,10vw,120px)}
+.band.alt{background:var(--band)}
+.eyebrow{font:600 13px/1.2 var(--text);letter-spacing:.12em;text-transform:uppercase;color:var(--copper)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h2{font-size:clamp(34px,5.2vw,60px);font-weight:700;letter-spacing:-.025em;line-height:1.05}
+h3{font-size:clamp(22px,2.4vw,28px);font-weight:600;letter-spacing:-.015em;line-height:1.15}
+.lead{font-size:clamp(19px,2vw,23px);line-height:1.45;color:var(--mute);max-width:44ch}
+.lead b{color:var(--fg);font-weight:500}
+.grad{background:linear-gradient(100deg,var(--copper-hi) 0%,var(--copper) 55%,#b77b3a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mono{font-family:var(--mono);font-size:.88em}
+.src{font:400 12px/1.4 var(--mono);color:#6e7078}
+
+/* nav */
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(0,0,0,.72);backdrop-filter:saturate(180%) blur(18px);-webkit-backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid rgba(255,255,255,.06)}
+nav.top .wrap{display:flex;align-items:center;gap:24px;height:48px;overflow-x:auto;scrollbar-width:none}
+nav.top .brand{font:600 15px var(--display);letter-spacing:-.01em;white-space:nowrap;color:var(--fg)}
+nav.top .links{display:flex;gap:20px;margin-left:auto}
+nav.top .links a{font-size:13px;color:#c9cbd1;white-space:nowrap}
+nav.top .pill{font-size:12px;padding:4px 10px;border-radius:99px;background:#1d1f24;color:var(--mute);white-space:nowrap}
+
+/* hero */
+.hero{position:relative;padding-block:clamp(24px,4vw,48px) clamp(8px,2vw,24px);text-align:center;overflow:hidden;background:radial-gradient(70% 60% at 50% 72%,rgba(217,163,91,.16) 0%,rgba(217,163,91,.05) 40%,transparent 72%),var(--bg)}
+.hero h1{font-size:clamp(40px,6.2vw,76px);font-weight:700;letter-spacing:-.035em;line-height:1;margin-top:10px}
+.hero .tag{font:500 clamp(19px,2.3vw,27px)/1.3 var(--display);letter-spacing:-.01em;color:#c9cbd1;margin:12px auto 0;max-width:30ch}
+.hero .tag b{color:var(--fg)}
+.cta{display:flex;flex-wrap:wrap;gap:12px 22px;justify-content:center;align-items:center;margin-top:20px}
+.btn{background:var(--copper);color:#140d04;font:600 15px var(--text);padding:10px 20px;border-radius:99px}
+.btn:hover{text-decoration:none;background:var(--copper-hi)}
+.link{color:var(--copper-hi);font-size:16px}
+.hero .lead{margin:22px auto 0;text-align:center;max-width:36ch}
+.hero-img{margin:clamp(24px,5vw,56px) auto 0;max-width:980px;filter:drop-shadow(0 40px 80px rgba(217,163,91,.16))}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:22px;overflow:hidden;text-align:left}
+.stat{background:var(--bg);padding:22px 22px 20px;min-width:0}
+.stat .n{font:700 clamp(26px,3.4vw,38px)/1.05 var(--display);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .t{color:var(--mute);font-size:14px;margin-top:6px}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* stack of boards */
+.boards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:44px}
+.bcard{background:var(--card);border-radius:20px;padding:18px 16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.bcard img{aspect-ratio:4/3;object-fit:contain;width:100%}
+.bcard .k{font:600 12px var(--mono);color:var(--copper)}
+.bcard h4{margin:0;font:600 17px/1.2 var(--display)}
+.bcard p{margin:0;color:var(--mute);font-size:14px;line-height:1.45}
+@media (max-width:980px){.boards{grid-template-columns:repeat(2,minmax(0,1fr))}.boards .bcard:first-child{grid-column:1/-1}}
+
+/* board feature rows */
+.feature{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(28px,5vw,64px);align-items:center}
+.feature.rev{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+.feature.rev .media{order:2}
+.feature .media img{width:100%}
+.feature h2{margin:10px 0 16px}
+.specs{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:14px}
+.specs li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;color:#d6d7dc;font-size:16px}
+.specs li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--copper);margin-top:9px}
+.specs b{color:var(--fg);font-weight:600}
+.dims{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{font:500 12px var(--mono);padding:5px 10px;border-radius:99px;background:#1b1c20;color:#c9cbd1;border:1px solid var(--line)}
+@media (max-width:860px){.feature,.feature.rev{grid-template-columns:minmax(0,1fr)}.feature.rev .media{order:0}}
+
+/* interfaces table */
+.tablewrap{overflow-x:auto;margin-top:36px;border:1px solid var(--line);border-radius:18px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:15px}
+th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--mute);background:#0e0f12}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap;font-weight:600}
+td .sub{color:var(--mute);font-size:13.5px}
+
+/* viewers */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.tab{font:500 14px var(--text);color:#c9cbd1;background:#16171b;border:1px solid var(--line);padding:8px 16px;border-radius:99px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--fg);color:#000;border-color:var(--fg)}
+.tabs.sub .tab{font-size:13px;padding:6px 12px}
+.viewer{margin-top:22px;background:var(--band);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.viewer img{width:100%;cursor:zoom-in}
+.viewer .cap{padding:16px 20px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px;border-top:1px solid var(--line);color:var(--mute);font-size:14.5px}
+.viewer .cap b{color:var(--fg);font-weight:600}
+.layers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px}
+.layer{background:var(--card);border-radius:16px;padding:16px;min-width:0}
+.layer .k{font:600 12px var(--mono);color:var(--copper)}
+.layer p{margin:6px 0 0;font-size:14px;color:var(--mute)}
+@media (max-width:760px){.layers{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.sheets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+.sheet{background:#f3f2ee;border-radius:14px;overflow:hidden;cursor:zoom-in;border:0;padding:0;text-align:left;display:flex;flex-direction:column}
+.sheet img{aspect-ratio:1.414/1;object-fit:cover;width:100%}
+.sheet span{display:block;background:var(--card);color:var(--fg);font:500 14px/1.35 var(--text);padding:12px 14px}
+.sheet span i{display:block;font-style:normal;color:var(--mute);font-size:12.5px;margin-top:2px}
+@media (max-width:860px){.sheets{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.sheets{grid-template-columns:minmax(0,1fr)}}
+
+/* pluses */
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:40px}
+.tile{background:var(--card);border-radius:20px;padding:24px 22px;min-width:0}
+.tile h4{margin:0 0 8px;font:600 19px/1.25 var(--display);letter-spacing:-.01em}
+.tile p{margin:0;color:var(--mute);font-size:15px}
+.tile .src{margin-top:12px}
+.tile.big{grid-column:span 2;background:linear-gradient(135deg,#1a1510 0%,#141518 60%)}
+.tile.big .n{font:800 clamp(56px,8vw,96px)/1 var(--display);letter-spacing:-.04em}
+@media (max-width:860px){.grid3{grid-template-columns:minmax(0,1fr)}.tile.big{grid-column:auto}}
+
+/* safety */
+.rule{margin-top:36px;padding:28px clamp(20px,4vw,40px);border-radius:24px;background:radial-gradient(120% 140% at 0% 0%,#2a1d0e 0%,#141518 55%);border:1px solid #3a2a16}
+.rule q{display:block;font:600 clamp(22px,3vw,34px)/1.2 var(--display);letter-spacing:-.02em;quotes:"«" "»"}
+.rule p{color:var(--mute);margin:12px 0 0;max-width:70ch}
+.prot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:22px}
+.p{background:var(--card);border-radius:18px;padding:20px;min-width:0;display:grid;gap:6px}
+.p .from{font:600 12px var(--text);letter-spacing:.08em;text-transform:uppercase;color:var(--copper)}
+.p .how{color:#e3e4e8;font-size:15.5px}
+.p .state{font:500 12px var(--mono);color:var(--ok)}
+.p .state.w{color:var(--warn)}
+@media (max-width:760px){.prot{grid-template-columns:minmax(0,1fr)}}
+.risks{margin-top:22px;border:1px solid #3d321c;background:#16130c;border-radius:18px;padding:20px 22px}
+.risks h4{margin:0 0 8px;font:600 17px var(--display);color:var(--warn)}
+.risks ul{margin:0;padding-left:18px;color:#d8d2c3;font-size:15px;display:grid;gap:8px}
+
+/* uses */
+.uses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:40px}
+.use{border-top:1px solid var(--line);padding-top:18px;min-width:0}
+.use h4{margin:0 0 6px;font:600 18px/1.3 var(--display)}
+.use p{margin:0;color:var(--mute);font-size:15px}
+@media (max-width:860px){.uses{grid-template-columns:minmax(0,1fr)}}
+
+/* status */
+.status{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;background:var(--card);border-radius:24px;padding:clamp(22px,4vw,36px)}
+.status .badge{font:600 13px var(--mono);padding:8px 14px;border-radius:99px;border:1px solid #3a3d45;color:#c9cbd1;white-space:nowrap}
+@media (max-width:640px){.status{grid-template-columns:minmax(0,1fr)}}
+footer{padding-block:40px 56px;color:#6e7078;font-size:13px}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.94);display:flex;flex-direction:column}
+.lb .bar{display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));color:#c9cbd1;font-size:14px}
+.lb .bar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb button{font:500 14px var(--text);background:#1d1f24;color:var(--fg);border:1px solid var(--line);border-radius:99px;padding:7px 14px;cursor:pointer}
+.lb .stage{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0px)}
+.lb .stage img{max-width:100%;max-height:100%;object-fit:contain;margin:auto;cursor:zoom-in}
+.lb .stage.zoom{align-items:flex-start;justify-content:flex-start}
+.lb .stage.zoom img{max-width:none;max-height:none;width:auto;cursor:zoom-out}
+@media (prefers-reduced-motion:no-preference){.fade{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}@keyframes rise{from{transform:translateY(18px)}to{transform:none}}}
+
+/* product hero: the module on its rail */
+.product{margin:clamp(12px,2.5vw,28px) auto 0;max-width:1100px;filter:drop-shadow(0 30px 70px rgba(0,0,0,.7))}
+.product figcaption,.cap-note{font:400 12px/1.4 var(--mono);color:#6e7078;margin-top:10px}
+.product img{display:block;width:auto;max-width:100%;max-height:min(66vh,680px);margin:0 auto}
+img.film{border-radius:18px;box-shadow:0 30px 80px rgba(16,145,130,.18)}
+
+/* exploded view */
+.explode{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center;margin-top:40px}
+.explode figure{margin:0}
+.explode img{width:100%;max-width:520px;margin:0 auto}
+.stack{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.stack li{background:var(--card);border-radius:16px;padding:16px 18px;min-width:0}
+.stack .k{font:600 12px var(--mono);color:var(--copper)}
+.stack h4{margin:4px 0 4px;font:600 17px/1.25 var(--display)}
+.stack p{margin:0;color:var(--mute);font-size:14.5px}
+.checks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:28px}
+.checks div{background:var(--band);padding:18px;display:grid;gap:4px;min-width:0}
+.checks b{font:700 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.checks span{color:var(--mute);font-size:13.5px}
+@media (max-width:860px){.explode{grid-template-columns:minmax(0,1fr)}.checks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* hero (product first, statement headline) */
+.hero{text-align:left;background:radial-gradient(60% 50% at 50% 38%,rgba(217,163,91,.13) 0%,transparent 70%),var(--bg);padding-block:clamp(8px,2vw,24px) clamp(40px,6vw,72px)}
+.hero .product{margin:0 auto}
+.hero .product img{max-height:min(60vh,620px)}
+.hero-copy{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-top:clamp(8px,2vw,20px)}
+.hero-copy>div{min-width:0}
+.pname{margin:0 0 10px;font:600 clamp(19px,2vw,24px)/1.2 var(--display);letter-spacing:-.01em;color:var(--fg)}
+.hero h1{font-size:clamp(40px,6.4vw,80px);font-weight:700;letter-spacing:-.04em;line-height:1.02;margin:0}
+.sub{margin:16px 0 0;color:var(--mute);font-size:clamp(16px,1.6vw,19px);max-width:52ch}
+.badge-pill{display:flex;align-items:center;gap:10px;background:#16171b;border:1px solid var(--line);border-radius:99px;padding:8px 8px 8px 18px;white-space:nowrap}
+.badge-pill span{font:600 14px var(--mono);color:var(--mute)}
+.badge-pill b{font:600 14px var(--text);background:var(--copper);color:#140d04;padding:8px 14px;border-radius:99px}
+/* highlights carousel */
+.hl{font-size:clamp(30px,4.2vw,48px);font-weight:700;letter-spacing:-.03em;margin:0}
+.rail{display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;padding:28px max(16px,calc((100vw - 1080px)/2)) 8px;scrollbar-width:none;scroll-padding-left:max(16px,calc((100vw - 1080px)/2))}
+.rail::-webkit-scrollbar{display:none}
+.slide{flex:0 0 min(88vw,1000px);height:min(70vh,600px);scroll-snap-align:start;border-radius:28px;background:linear-gradient(180deg,#121317 0%,#0b0c0f 100%);border:1px solid #1c1e23;display:flex;flex-direction:column;overflow:hidden;color:var(--fg);text-decoration:none}
+.slide:hover{text-decoration:none;border-color:#2b2e35}
+.slide .st{padding:clamp(22px,3vw,36px) clamp(22px,3vw,40px) 0;text-align:center}
+.slide h3{font-size:clamp(22px,2.6vw,32px);font-weight:600;letter-spacing:-.02em}
+.slide p{margin:8px auto 0;color:var(--mute);max-width:48ch;font-size:16px}
+.slide img{flex:1;min-height:0;width:100%;object-fit:contain;padding:18px 24px 24px}
+.slide.cu img{object-fit:cover;padding:22px 0 0}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:18px}
+.dots button{width:8px;height:8px;border-radius:99px;border:0;background:#3a3d45;padding:0;cursor:pointer;transition:width .3s,background .3s}
+.dots button[aria-selected="true"]{width:28px;background:var(--fg)}
+/* top features */
+.feats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:28px}
+.feat{background:#141518;border-radius:22px;padding:24px 20px;text-align:center;display:grid;justify-items:center;gap:6px;min-width:0}
+.feat svg{width:34px;height:34px;fill:none;stroke:var(--copper-hi);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px}
+.feat .fl{font-size:13px;color:var(--mute)}
+.feat h4{margin:4px 0 0;font:600 17px/1.3 var(--display)}
+.feat p{margin:4px 0 0;font-size:14px;color:#c9cbd1}
+@media (max-width:860px){.feats{grid-template-columns:repeat(2,minmax(0,1fr))}.slide{height:min(64vh,520px)}}
+
+.hero .product{max-width:1240px}
+.hero .product img{max-height:min(74vh,780px);width:100%;object-fit:contain}
+.slide.tall{flex-direction:row;align-items:stretch}
+.slide.tall .st{flex:1;text-align:left;align-self:center;padding:clamp(24px,4vw,56px)}
+.slide.tall .st p{margin-left:0}
+.slide.tall img{flex:0 0 46%;height:100%;padding:16px 24px 16px 0}
+.feat{align-content:start}
+@media (max-width:700px){.slide.tall{flex-direction:column}.slide.tall img{flex:1;width:100%;padding:0 16px 16px}}
+
+/* hero v3: copy left, product right, fills the first screen */
+.hero{padding:0;background:radial-gradient(55% 60% at 70% 50%,rgba(217,163,91,.14) 0%,transparent 70%),var(--bg)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.5fr);align-items:center;gap:clamp(16px,3vw,48px);min-height:calc(100vh - 48px - env(safe-area-inset-top,0px));max-width:1480px;margin:0 auto;padding-block:clamp(16px,3vw,40px);padding-left:max(24px,env(safe-area-inset-left,0px),calc((100vw - 1080px)/2));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero-grid .hero-copy{display:block;margin:0}
+.hero-grid .hero-copy .badge-pill{display:inline-flex;margin-top:28px}
+.hero-grid h1{font-size:clamp(38px,4.6vw,72px)}
+.hero-grid .product{margin:0;max-width:none}
+.hero-grid .product img{width:100%;max-height:min(82vh,900px);object-fit:contain}
+@media (max-width:900px){.hero-grid{grid-template-columns:minmax(0,1fr);min-height:0;padding-left:max(16px,env(safe-area-inset-left,0px))}.hero-grid .product{order:-1}.hero-grid .product img{max-height:52vh}}
+
+/* highlights: pinned while the page scrolls, cards slide sideways (Apple-style) */
+.hl-pin{position:relative;height:calc(var(--n) * 80vh + 20vh)}
+.hl-sticky{position:sticky;top:calc(48px + env(safe-area-inset-top,0px));height:calc(100vh - 48px - env(safe-area-inset-top,0px));display:flex;flex-direction:column;justify-content:center;gap:22px;overflow:hidden}
+.hl-view{overflow:hidden}
+.hl-track{display:flex;gap:20px;padding-inline:max(16px,calc((100vw - 1080px)/2));will-change:transform;transition:transform .18s ease-out}
+.hl-track .slide{flex:0 0 min(84vw,1000px);height:min(64vh,580px)}
+.hl-pin .dots{margin-top:0}
+.hl-pin.static{height:auto;padding-block:clamp(40px,6vw,80px)}
+.hl-pin.static .hl-sticky{position:static;height:auto}
+.hl-pin.static .hl-view{overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.hl-pin.static .hl-view::-webkit-scrollbar{display:none}
+.hl-pin.static .hl-track{transform:none!important;transition:none}
+.hl-pin.static .slide{scroll-snap-align:center}
+</style>
+</head>
+<body>
+
+
+<nav class="top" aria-label="Sections">
+  <div class="wrap">
+    <span class="brand">GI‑ECR‑24DC</span>
+    <div class="links">
+      <a href="#inside">Inside</a><a href="#boards">Boards</a><a href="#io">I/O</a><a href="#copper">Copper</a><a href="#schematics">Schematics</a><a href="#safety">Safety</a><a href="#uses">Uses</a>
+    </div>
+    <span class="pill">r0.1 · on hold</span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="pname">GI‑ECR‑24DC</p>
+      <h1 class="fade">Zero errors.<br>Down to the last trace.</h1>
+      <p class="sub">Our own 24 V DC controller for the DIN rail. Five boards, first‑tier parts, two independent design reviews.</p>
+      <div class="badge-pill"><span>r0.1</span><b>Ready for production</b></div>
+    </div>
+    <figure class="product fade">
+      <img src="img/module_34.webp" alt="GI-ECR-24DC on a 35 mm DIN rail: Bernic 1050 housing with our milled lid and front film, current-clamp plug on top">
+    </figure>
+  </div>
+</header>
+
+<section class="hl-pin" id="highlights" aria-label="Highlights" style="--n:5">
+  <div class="hl-sticky">
+    <div class="wrap"><h2 class="hl">Get the highlights.</h2></div>
+    <div class="hl-view"><div class="hl-track" id="hlTrack"><a class="slide tall" href="#inside"><div class="st"><h3>Five boards. One 6‑module housing.</h3><p>No wires inside — two side boards carry every signal.</p></div><img src="img/module_exploded.webp" alt=""></a><a class="slide cu" href="#copper"><div class="st"><h3>Every layer drawn by code.</h3><p>Teardrops, solid ground, tidy buses — straight from the fab files.</p></div><img src="img/B2_cu_L1.webp" alt=""></a><a class="slide " href="#boards"><div class="st"><h3>The input stage of an S7‑1200.</h3><p>Fuse, 5 kW TVS, filter, reverse‑polarity diode, 600 µF hold‑up.</p></div><img src="img/B1_iso.webp" alt=""></a><a class="slide " href="#boards"><div class="st"><h3>A 1.6 mm Ethernet barrier on every layer.</h3><p>Four layers with two solid ground planes under the CPU and PHY.</p></div><img src="img/B2_top.webp" alt=""></a><a class="slide " href="#boards"><div class="st"><h3>Seven LEDs. One key. Nothing else.</h3><p>A printed film over a milled lid; the buzzer needs no hole.</p></div><img src="img/module_front.webp" alt=""></a></div></div>
+    <div class="dots" id="hlDots" role="tablist" aria-label="Highlights"></div>
+  </div>
+</section>
+
+<section class="band" aria-label="Top features" style="padding-block:clamp(24px,4vw,48px) clamp(48px,7vw,96px)">
+  <div class="wrap">
+    <h2 class="hl">Top features.</h2>
+    <div class="feats"><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg><span class="fl">Power</span><h4>24 V DC, nothing else</h4><p>20.4–28.8 V · +24 V and 0 V only</p></div><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="18" height="6" rx="1"/><path d="M6 6v12M18 6v12"/></svg><span class="fl">Housing</span><h4>6 DIN modules</h4><p>Bernic 1050 · 105 × 86 mm</p></div><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M9 3v3M12 3v3M15 3v3M9 18v3M12 18v3M15 18v3M3 9h3M3 12h3M3 15h3M18 9h3M18 12h3M18 15h3"/></svg><span class="fl">Processor</span><h4>STM32H753, Cortex‑M7</h4><p>up to 480 MHz · 2 MB flash · 1 MB RAM</p></div><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="12" rx="2"/><path d="M8 17v3h8v-3M9 9h1M12 9h1M15 9h1"/></svg><span class="fl">Network</span><h4>Ethernet to the cloud</h4><p>10/100 · MQTT with mTLS</p></div><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 15l4-6 4 6M12 9v-3"/></svg><span class="fl">Outputs</span><h4>Two 24 V outputs</h4><p>2 × 0.25 A for 25 A relay coils</p></div><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h18M3 16h18"/><circle cx="7" cy="8" r="1.6"/><circle cx="17" cy="16" r="1.6"/><path d="M7 9.6V16M17 8v6.4"/></svg><span class="fl">Field bus</span><h4>RS‑485 Modbus master</h4><p>0.3 A sensor supply · up to 50 m</p></div><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 1 14 0"/><path d="M5 12v4M19 12v4M12 5v14"/></svg><span class="fl">Current</span><h4>Clamp input, 24‑bit</h4><p>333 mV · 4000 samples/s</p></div><div class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v16M15 4v16M4 12h5M15 12h5"/></svg><span class="fl">Ride‑through</span><h4>Keeps working on power loss</h4><p>≥ 10 ms (PS2) · 23 ms calculated</p></div></div>
+  </div>
+</section>
+
+<section class="band alt" id="inside">
+  <div class="wrap">
+    <div class="eyebrow">Inside</div>
+    <h2 style="margin-top:12px">Take it apart.<br><span class="grad">Every part where it belongs.</span></h2>
+    <p class="lead" style="margin-top:18px">Rendered from the real board files with every part model, inside the manufacturer’s housing model. Every mating connector pair lines up within 0.005 mm, every LED within its lid window.</p>
+    <div class="explode">
+      <figure><img src="img/module_exploded.webp" alt="Exploded view: front film, lid, board 3, board 2 with the side boards, board 1, housing base, DIN rail" loading="lazy"></figure>
+      <ol class="stack">
+        <li><span class="k">7 · Front film</span><h4>Printed PET overlay, 102 × 41 mm</h4><p>Tinted LED windows, embossed key dome, glued into the lid recess.</p></li>
+        <li><span class="k">6 · Lid</span><h4>Bernic 1050 lid, grey RAL 7035</h4><p>Our milled openings: 7 LED windows, key hole, RJ45 window, wire windows, screwdriver holes.</p></li>
+        <li><span class="k">5 · Board 3</span><h4>Front board</h4><p>ROHM LEDs, Omron B3F key, TDK buzzer; long Samtec TSW pins plug into board 2.</p></li>
+        <li><span class="k">4 · Board 2 + side boards</span><h4>Processor unit</h4><p>STM32H753, DP83848 Ethernet, RJ45, W25Q128JV, ATECC608B. The side boards BL / BR are soldered to its edge contacts and stand in the lid slots.</p></li>
+        <li><span class="k">3 · Board 1</span><h4>Power and field I/O</h4><p>Phoenix MKDS screw terminals, current‑clamp plug, LMR38010 converter, hold‑up bank, Samtec SSW sockets for the side boards.</p></li>
+        <li><span class="k">2 · Base</span><h4>Bernic 1050 base, black RAL 9005</h4><p>Board 1 rests on its ribs; the base snaps onto the rail.</p></li>
+        <li><span class="k">1 · DIN rail</span><h4>35 mm top‑hat rail, EN 60715</h4><p>Not part of the product.</p></li>
+      </ol>
+    </div>
+    <div class="checks">
+      <div><b>0.005 mm</b><span>max. offset of the six board‑to‑board connector pairs</span></div>
+      <div><b>0.000 mm</b><span>LED to lid window offset</span></div>
+      <div><b>0.63 mm</b><span>RJ45 clearance each side in its window</span></div>
+      <div><b>0</b><span>intersections between the lid and any board or part</span></div>
+    </div>
+    <p class="src" style="margin-top:14px">Not shown: the DIN latch slider, the two board‑1 screws, cables. Housing from the manufacturer’s STEP, not a measured sample. Source: tools/showcase_3d.py, docs/showcase/img/module_parts.json.</p>
+  </div>
+</section>
+
+
+<section class="band">
+  <div class="wrap feature">
+    <div class="media"><img src="img/B1_iso.webp" alt="Board 1" loading="lazy"></div>
+    <div>
+      <div class="eyebrow">Inside the housing</div>
+      <h2>Built like the controllers it sits next to.</h2>
+      <p class="lead">The input stage follows the Siemens S7‑1200: fuse, surge suppressor, filter, reverse‑polarity protection and a 600 µF hold‑up bank. The outputs use the same transistor as the S7‑1215C.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band alt" id="boards">
+  <div class="wrap">
+    <div class="eyebrow">Architecture</div>
+    <h2 style="margin-top:12px">Five boards.<br><span class="grad">One module.</span></h2>
+    <p class="lead" style="margin-top:18px">Board 1 rests on the ribs of the housing base. Two side boards stand in the slots of the lid, carry boards 2 and 3 and pass the signals between them. <b>No wires inside.</b></p>
+    <div class="boards">
+      <div class="bcard"><img src="img/B1_iso.webp" alt="Board 1" loading="lazy"><span class="k">B1 · 2 layers</span><h4>Power and field I/O</h4><p>24 V input, 3.3 V converter, DQ outputs, RS‑485, current clamp.</p></div>
+      <div class="bcard"><img src="img/B2_iso.webp" alt="Board 2" loading="lazy"><span class="k">B2 · 4 layers</span><h4>CPU and Ethernet</h4><p>STM32H753, DP83848, 16 MB flash, secure element.</p></div>
+      <div class="bcard"><img src="img/B3_iso.webp" alt="Board 3" loading="lazy"><span class="k">B3 · 2 layers</span><h4>Front panel</h4><p>7 LEDs, a key, a buzzer.</p></div>
+      <div class="bcard"><img src="img/BL_iso.webp" alt="Left side board" loading="lazy"><span class="k">BL · 2 layers</span><h4>Left wall</h4><p>RS‑485, power‑fail, sensor supply, +3V3.</p></div>
+      <div class="bcard"><img src="img/BR_iso.webp" alt="Right side board" loading="lazy"><span class="k">BR · 2 layers</span><h4>Right wall</h4><p>Current‑ADC SPI, output commands, power‑good.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap feature">
+    <div class="media"><img src="img/B1_top.webp" alt="Board 1, top view" loading="lazy"></div>
+    <div>
+      <div class="eyebrow">Board 1 · bottom</div>
+      <h2>Power, outputs, RS‑485, current.</h2>
+      <p class="lead">Everything that touches the field wiring lives here, on screw terminals with enlarged oval pads.</p>
+      <ul class="specs">
+        <li><span><b>24 V input:</b> Littelfuse 2 A fuse → 5 kW TVS diode → 100 µH choke and 1 µF 250 V film capacitor → Schottky diode → 4 × 150 µF.</span></li>
+        <li><span><b>TI LMR38010</b> buck converter, 24 → 3.3 V, 1 A, behind its own 0.375 A fuse.</span></li>
+        <li><span><b>Outputs DQ1 / DQ2:</b> onsemi NTD2955 high‑side switches, as in the S7‑1215C, with a coil‑clamp diode each.</span></li>
+        <li><span><b>Sensor supply:</b> two Infineon ITS4141N smart switches in series, current measured by a TI INA240.</span></li>
+        <li><span><b>Clamp current:</b> TI ADS131M02 with its own 8.192 MHz oscillator right next to it.</span></li>
+        <li><span><b>29 test points</b> for measurements on the first board.</span></li>
+      </ul>
+      <div class="dims"><span class="chip">99.0 × 82.0 mm</span><span class="chip">2 layers · 1.6 mm</span><span class="chip">111 parts placed by the fab</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap feature rev">
+    <div class="media"><img src="img/B2_top.webp" alt="Board 2, top view" loading="lazy"></div>
+    <div>
+      <div class="eyebrow">Board 2 · middle</div>
+      <h2>CPU, Ethernet, keys.</h2>
+      <p class="lead">Four layers: parts and routing outside, <b>two solid ground planes inside</b>. A solid copper area under the CPU spreads its heat.</p>
+      <ul class="specs">
+        <li><span><b>ST STM32H753ZIT6</b> in LQFP‑144, 0.5 mm pin pitch.</span></li>
+        <li><span><b>Ethernet:</b> TI DP83848I, 50 MHz oscillator, Pulse magnetics, shielded RJ45.</span></li>
+        <li><span><b>Impedance‑designed lines:</b> RMII ≈ 64–68 Ω, cable pairs 100 Ω differential.</span></li>
+        <li><span><b>1.6 mm Ethernet barrier</b> on every layer: the cable side is kept apart from all other copper.</span></li>
+        <li><span><b>Winbond W25Q128JV</b> 16 MB QSPI flash for the log, <b>Microchip ATECC608B</b> for the cloud keys.</span></li>
+        <li><span>A 0.22 F supercapacitor keeps the clock running for 1.3–3.6 days without power; two air thermometers inside.</span></li>
+      </ul>
+      <div class="dims"><span class="chip">94.6 × 54.2 mm</span><span class="chip">4 layers · JLC04161H‑7628</span><span class="chip">ENIG</span><span class="chip">116 parts placed by the fab</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap feature">
+    <div class="media"><img src="img/module_front.webp" alt="Front of the module: STATUS, LINK, OUTPUT and MANUAL fields of the film over the milled lid" loading="lazy"></div>
+    <div>
+      <div class="eyebrow">Board 3 · front</div>
+      <h2>See everything. One key.</h2>
+      <p class="lead">A printed PET film covers the milled lid. The LEDs shine through tinted windows, and the key sits under a raised dome.</p>
+      <ul class="specs">
+        <li><span><b>7 ROHM LEDs:</b> PWR, RUN, ERR, ETH, RS‑485, DQ1, DQ2. Resistors are chosen so they all look equally bright.</span></li>
+        <li><span><b>Omron B3F key:</b> a short press turns the selected output on for N minutes, a 3 s hold cancels.</span></li>
+        <li><span><b>TDK buzzer,</b> ≥ 70 dB(A) at 10 cm, mounted under the board, so the lid needs no hole.</span></li>
+        <li><span>Board 3 cannot be fitted rotated by 180°: the headers are placed asymmetrically.</span></li>
+      </ul>
+      <div class="dims"><span class="chip">99.2 × 42.1 mm</span><span class="chip">2 layers</span><span class="chip">29 parts placed by the fab</span><span class="chip">film 102 × 41 mm</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap feature rev">
+    <div class="media"><img src="img/BR_iso.webp" alt="Side board" loading="lazy"></div>
+    <div>
+      <div class="eyebrow">Side boards BL and BR</div>
+      <h2>Walls that carry signals.</h2>
+      <p class="lead">Each wall plugs into board 1 from below, holds board 2 by its tabs and carries board 3 on its shoulders.</p>
+      <ul class="specs">
+        <li><span>Every signal has a 0 V return beside it; 0 V copper is poured on both sides.</span></li>
+        <li><span><b>All board‑to‑board connectors are tin‑plated Samtec parts:</b> SSW sockets, HTSW and TSW pins. Catalogue parts only, no gold.</span></li>
+        <li><span>The shoulders of the side boards set the height of board 3. The long pins are soldered from the top.</span></li>
+      </ul>
+      <div class="dims"><span class="chip">56.6 × 40.95 mm</span><span class="chip">2 layers</span><span class="chip">no SMD parts</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="io">
+  <div class="wrap">
+    <div class="eyebrow">Inputs and outputs</div>
+    <h2 style="margin-top:12px">What you connect.</h2>
+    <img src="img/module_34_cables.webp" alt="Module from below: RJ45 window and the wire windows of the bottom terminal row" loading="lazy" style="margin:32px auto 0;max-width:900px;width:100%">
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Connector</th><th>Purpose</th><th>Limits</th></tr></thead>
+        <tbody>
+          <tr><td>J301 <span class="sub">+24 V / 0V</span></td><td>Module supply</td><td>20.4–28.8 V; built‑in 2 A time‑lag fuse; a source above 250 VA needs an external fuse ≤ 4 A <div class="sub">IEC 61131‑2 limited‑power circuit</div></td></tr>
+          <tr><td>J401 <span class="sub">DQ1 · 0V · DQ2 · 0V</span></td><td>Two 24 V outputs for relay coils</td><td>0.25 A per output, drop ≤ 0.7 V, cable up to 30 m <div class="sub">no overload protection on board — external 0.5 A fuse, as with the S7‑1215C</div></td></tr>
+          <tr><td>J201 <span class="sub">A · B · +24V_SENS · 0V</span></td><td>RS‑485 Modbus RTU (master) and sensor supply</td><td>TI THVD2410: ±70 V bus fault tolerance, up to 500 kbit/s; 120 Ω termination on board; up to 0.3 A for sensors</td></tr>
+          <tr><td>J1 <span class="sub">CT− · CT+</span></td><td>Current clamp with 333 mV output</td><td>±1.2 V peak input; a 60 A clamp is not clipped up to 216 A instantaneous; lead up to 3 m</td></tr>
+          <tr><td>J101 <span class="sub">RJ45</span></td><td>Ethernet 10/100</td><td>1500 V AC 1 min cable isolation; cloud link and firmware update with roll‑back</td></tr>
+          <tr><td>J501 <span class="sub">2 × 5, 1.27 mm</span></td><td>CPU debug and programming (SWD)</td><td>Inside the housing, ST‑LINK cable</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="src" style="margin-top:12px">Sources: docs/01 §8, docs/13, docs/16, docs/04; pin‑out taken from the board 1 netlist.</p>
+  </div>
+</section>
+
+<section class="band alt" id="copper">
+  <div class="wrap">
+    <div class="eyebrow">Copper</div>
+    <h2 style="margin-top:12px">Every layer.<br><span class="grad">Every trace.</span></h2>
+    <p class="lead" style="margin-top:18px">The layers come straight from the fabrication files. The boards are drawn by generator scripts and never edited by hand. Teardrops at pad entries, solid ground, tidy buses.</p>
+    <div class="tabs" role="tablist" aria-label="Board" id="cuBoards"></div>
+    <div class="tabs sub" role="tablist" aria-label="Layer" id="cuLayers"></div>
+    <div class="viewer"><img id="cuImg" src="img/B2_cu_L1.webp" alt="Copper layer"><div class="cap"><span id="cuCap"></span><span class="mono" id="cuMeta"></span></div></div>
+    <div class="layers">
+      <div class="layer"><span class="k">L1</span><p>Parts and routing; RMII and Ethernet pairs with designed impedance.</p></div>
+      <div class="layer"><span class="k">L2</span><p>Solid 0 V plane under the L1 routing.</p></div>
+      <div class="layer"><span class="k">L3</span><p>Second solid 0 V plane for the L4 routing.</p></div>
+      <div class="layer"><span class="k">L4</span><p>Routing and power; every signal via has a 0 V via beside it.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="schematics">
+  <div class="wrap">
+    <div class="eyebrow">Schematics</div>
+    <h2 style="margin-top:12px">Our own circuit.<br>No ready‑made modules.</h2>
+    <p class="lead" style="margin-top:18px">Discrete parts only. Inside each block the parts are wired, and the margins of each sheet record the calculation: what was chosen and why.</p>
+    <div class="tabs" role="tablist" aria-label="Board" id="schBoards"></div>
+    <div class="sheets" id="sheets"></div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="wrap">
+    <div class="eyebrow">Strengths</div>
+    <h2 style="margin-top:12px">Made so that<br>you can trust it.</h2>
+    <div class="grid3">
+      <div class="tile big"><div class="n grad">0</div><h4 style="margin-top:8px">DRC, ERC and schematic‑to‑board errors on all five boards</h4><p>No design rule was relaxed to make a board pass. No part sits under the body of another — checked in 3D.</p><div class="src">docs/44 §1</div></div>
+      <div class="tile"><h4>Two independent reviews</h4><p>Opus and Fable reviewed all five boards before ordering and every change after the audit. Where they disagreed, they converged on one decision.</p><div class="src">docs/reviews/2026‑11‑23…24</div></div>
+      <div class="tile"><h4>First‑tier parts</h4><p>TI, ST, Murata, TDK, YAGEO, Vishay, Panasonic, Littelfuse, Nexperia, Infineon, ROHM, Samtec, Winbond. Every part has an LCSC code, a manufacturer part number and a datasheet.</p><div class="src">kicad/parts.json</div></div>
+      <div class="tile"><h4>Numbers from datasheets and standards</h4><p>Calculations to IEC 61131‑2 (PLCs), IEC 61000‑4‑5 (surge), IEC 60664‑1 (clearances). Where a number comes from a calculation or a model, it says so.</p><div class="src">docs/13_CALC_*</div></div>
+      <div class="tile"><h4>Checked against the Siemens S7‑1200</h4><p>Input, hold‑up bank and outputs follow the S7‑1200 and S7‑1215C, plus TI and ST evaluation boards.</p><div class="src">docs/16, docs/23</div></div>
+      <div class="tile"><h4>The cloud key never leaves the chip</h4><p>The private key is generated inside the ATECC608B. Works with AWS IoT, Azure or your own MQTT broker.</p><div class="src">docs/07 §2</div></div>
+      <div class="tile"><h4>Tin, not gold</h4><p>All board‑to‑board connectors are tin‑plated Samtec catalogue parts. Tin is never mated with gold.</p><div class="src">docs/39 §13</div></div>
+      <div class="tile"><h4>Ready to measure</h4><p>29 test points on board 1 and 10 on board 2. The converter has an injection point for a Bode plot.</p><div class="src">docs/14, rule 16b</div></div>
+      <div class="tile"><h4>Generous clearances</h4><p>≥ 0.2 mm on the board where IEC 61131‑2 asks for 0.04 mm, ≥ 1.6 mm between terminals.</p><div class="src">docs/19 item 1.9</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="safety">
+  <div class="wrap">
+    <div class="eyebrow">Safety and protection</div>
+    <h2 style="margin-top:12px">It may fail — <span class="grad">it must not burn.</span></h2>
+    <div class="rule">
+      <q>No fire and no electric shock after any single fault.</q>
+      <p>The ground rule of the project. Every block has a table “fault → what happens → what limits it → result”. The device may break, but it must not become dangerous. Board and housing are UL94 V‑0 and do not sustain a flame.</p>
+    </div>
+    <div class="prot">
+      <div class="p"><span class="from">Reverse polarity</span><span class="how">Schottky diodes block and the TVS diode does not conduct. The module simply does not start; the fuse survives.</span><span class="state">✓ calculation · docs/13_CALC_input §2.7</span></div>
+      <div class="p"><span class="from">Supply surges 0.5 and 1 kV</span><span class="how">5 kW TVS diode and filter: at 1 kV the bank sees ≤ 39.5 V against a 50 V rating.</span><span class="state w">✓ ngspice · small TVS margin</span></div>
+      <div class="p"><span class="from">Power loss</span><span class="how">The 600 µF bank holds ≥ 23 ms. The power‑fail signal reaches the CPU early, so the log is written in time.</span><span class="state">✓ IEC 61131‑2 PS2 · calculation</span></div>
+      <div class="p"><span class="from">Overvoltage on 3.3 V</span><span class="how">An ST TS820 thyristor shorts the rail at 3.60–3.75 V and the 0.375 A fuse F302 opens.</span><span class="state">✓ fire ruled out by calculation</span></div>
+      <div class="p"><span class="from">Short on the sensor supply</span><span class="how">ITS4141N limits the current (peak ≤ 2.1 A, then ≈ 1.1 A with thermal shutdown). A second switch in series backs up the first.</span><span class="state">✓ docs/13_CALC_sens §3</span></div>
+      <div class="p"><span class="from">Surges and ESD on RS‑485</span><span class="how">SMAJ30CA TVS diodes on A and B, SMAJ33A on the sensor supply. The THVD2410 withstands ±12 kV ESD.</span><span class="state w">✓ calculation · ≈ 4 % margin at 1 kV</span></div>
+      <div class="p"><span class="from">ESD on Ethernet</span><span class="how">TI TPD4E1U06 (±15 kV) at the PHY; a 1500 V AC barrier — magnetics and 1.6 mm of copper spacing.</span><span class="state w">sample test required</span></div>
+      <div class="p"><span class="from">ESD on the key and the clamp</span><span class="how">TPD1E10B06, series resistors and an RC filter. The 0.2 mm PET film alone holds 8 kV.</span><span class="state">✓ docs/27 §7, docs/13_CALC_ct</span></div>
+      <div class="p"><span class="from">Relay coil turn‑off</span><span class="how">A clamp diode on every output: ≤ ≈ 30 V across the switch against a 60 V rating.</span><span class="state">✓ docs/16 §3</span></div>
+      <div class="p"><span class="from">Lock‑up</span><span class="how">A hardware watchdog that software cannot disable and a brown‑out reset. The secure element has its own power switch for a restart.</span><span class="state">firmware requirement · docs/01 FW4</span></div>
+      <div class="p"><span class="from">Unauthorised access</span><span class="how">AES, SHA‑2 and a random‑number generator in the STM32H753, memory read‑out protection, a boot loader that checks signatures.</span><span class="state">docs/07 §5–6</span></div>
+      <div class="p"><span class="from">Shock through the clamp</span><span class="how">Requires a PELV system (0 V bonded to PE) and a 30 mA RCD. Clamp insulated conductors only.</span><span class="state w">installation condition · docs/01 §8</span></div>
+    </div>
+    <div class="risks">
+      <h4>Accepted risks, stated openly</h4>
+      <ul>
+        <li>If a hold‑up capacitor shorts while the source is current‑limited to 2.5–5 A, the input choke heats to 147–380 °C until power is removed. The S7‑1200 is built the same way; to be tested on the first board.</li>
+        <li>The DQ outputs have no overload protection, like the S7‑1215C. An external fast 0.5 A fuse is required.</li>
+        <li>24 V wired to the clamp input or to a DQ output by mistake destroys the device. Only the manual guards against it.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="band alt" id="uses">
+  <div class="wrap">
+    <div class="eyebrow">What it is for</div>
+    <h2 style="margin-top:12px">Boiler room, pumps, sensors.<br><span class="grad">And the cloud.</span></h2>
+    <div class="uses">
+      <div class="use"><h4>Heavy loads</h4><p>Water heater and heating through external 25 A relays or contactors with 24 V coils. No 230 V on the board.</p></div>
+      <div class="use"><h4>Is the load running</h4><p>A clamp on the wire shows whether the pump or boiler fan started and how long it ran. A stuck output shows up too.</p></div>
+      <div class="use"><h4>Modbus sensors</h4><p>Polls and powers sensors on cables up to 50 m, outdoors included.</p></div>
+      <div class="use"><h4>Cloud</h4><p>MQTT over mTLS: AWS IoT, Azure or your own broker. Firmware updates with roll‑back.</p></div>
+      <div class="use"><h4>Without a network</h4><p>The key turns an output on for N minutes. The log goes to 16 MB of flash and the clock keeps running without power.</p></div>
+      <div class="use"><h4>Alarm</h4><p>Red ERR LED and a buzzer of at least 70 dB(A).</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="status">
+      <div>
+        <div class="eyebrow">Status</div>
+        <h3 style="margin-top:10px">Revision r0.1 is ready for production. The project has been on hold since 24 November 2026.</h3>
+        <p style="color:var(--mute);margin:12px 0 0;max-width:68ch">Fabrication files for all five boards are complete and error‑free. No boards have been made yet. Reasons for the pause: the cost of two units (≈ $604 assembled by JLC, ≈ $411 hand‑assembled, before shipping and VAT) and parts that are out of stock today. Every number on this page comes from calculations and models, not from measurements.</p>
+      </div>
+      <span class="badge">DRC 0 · ERC 0 · parity 0</span>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">GI‑ECR‑24DC · GUTOVSKII · r0.1 · KiCad 10 · JLCPCB. Product images are Cycles renders of the real board files (all part 3D models) inside the manufacturer’s Bernic 1050 model with our milled lid and front film — not photos of a built unit.</div></footer>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Viewer">
+  <div class="bar"><span id="lbCap"></span><button type="button" id="lbZoom">Zoom</button><button type="button" id="lbClose">Close</button></div>
+  <div class="stage" id="lbStage"><img id="lbImg" alt=""></div>
+</div>
+
+<script>
+(function(){
+  const CU={
+    "Board 1":[["Top","B1_cu_top","Signals, 24 V and 3.3 V power, clamp input; oval terminal pads"],["Bottom","B1_cu_bot","Almost solid 0 V copper — 6925 mm² of pour"]],
+    "Board 2":[["L1","B2_cu_L1","Parts and routing: CPU, PHY, RMII, Ethernet pairs, 1.6 mm barrier at the RJ45"],["L2","B2_cu_L2","Solid 0 V plane; no copper under the cable side"],["L3","B2_cu_L3","Second solid 0 V plane"],["L4","B2_cu_L4","Bottom routing and power; side‑board contacts along the edges"]],
+    "Board 3":[["Top","B3_cu_top","LEDs, key, ESD protection"],["Bottom","B3_cu_bot","Buzzer and headers to board 2"]],
+    "Side":[["Component side","BL_cu_top","Signals with a 0 V return beside each one"]]
+  };
+  const SCH={
+    "Board 1":[["sch_B1-1","Top sheet","board 1 structure"],["sch_B1-2","Power","24 V input, 3.3 V DC/DC, power‑fail, +3V3 crowbar"],["sch_B1-3","Current clamp","ADS131M02, input protection"],["sch_B1-4","RS‑485","THVD2410, sensor supply"],["sch_B1-5","Outputs DQ1 / DQ2","24 V sourcing, as S7‑1215C"],["sch_B1-6","Connectors","to the side boards"]],
+    "Board 2":[["sch_B2-1","Top sheet","board 2 structure"],["sch_B2-2","CPU","STM32H753ZIT6"],["sch_B2-3","Memory and keys","W25Q128JV, ATECC608B"],["sch_B2-4","Ethernet","DP83848I, 50 MHz, HX1188, RJ45"],["sch_B2-5","Thermometers","2 × DS18B20"],["sch_B2-6","Connectors","to the side boards and board 3"]],
+    "Board 3":[["sch_B3-1","Top sheet","front board"],["sch_B3-2","LEDs and key","headers to board 2"]],
+    "Side":[["sch_BL-1","Top sheet","left side board"],["sch_BL-2","Links","board 1 J602 / J604 → board 2"]]
+  };
+  const $=id=>document.getElementById(id);
+  function tabs(el,names,cur,on){
+    el.innerHTML="";
+    names.forEach(n=>{const b=document.createElement("button");b.type="button";b.className="tab";b.setAttribute("role","tab");b.textContent=n;b.setAttribute("aria-selected",String(n===cur));b.onclick=()=>on(n);el.appendChild(b);});
+  }
+  let cuB="Board 2",cuL=0;
+  function drawCu(){
+    tabs($("cuBoards"),Object.keys(CU),cuB,n=>{cuB=n;cuL=0;drawCu();});
+    const ls=CU[cuB];
+    tabs($("cuLayers"),ls.map(l=>l[0]),ls[cuL][0],n=>{cuL=ls.findIndex(l=>l[0]===n);drawCu();});
+    const l=ls[cuL];$("cuImg").src="img/"+l[1]+".webp";$("cuImg").alt=cuB+", layer "+l[0];
+    $("cuCap").innerHTML="<b>"+cuB+" · "+l[0]+".</b> "+l[2];$("cuMeta").textContent=l[1]+".webp";
+  }
+  let schB="Board 1";
+  function drawSch(){
+    tabs($("schBoards"),Object.keys(SCH),schB,n=>{schB=n;drawSch();});
+    const box=$("sheets");box.innerHTML="";
+    SCH[schB].forEach(s=>{const b=document.createElement("button");b.type="button";b.className="sheet";
+      b.innerHTML='<img loading="lazy" src="img/'+s[0]+'.webp" alt="'+s[1]+'"><span>'+s[1]+'<i>'+s[2]+'</i></span>';
+      b.onclick=()=>openLb("img/"+s[0]+".webp",schB+" · "+s[1]+" — "+s[2]);box.appendChild(b);});
+  }
+  const lb=$("lb"),stage=$("lbStage");
+  function openLb(src,cap){$("lbImg").src=src;$("lbCap").textContent=cap;stage.classList.remove("zoom");$("lbZoom").textContent="Zoom";lb.hidden=false;$("lbClose").focus();}
+  function zoom(){const z=stage.classList.toggle("zoom");$("lbZoom").textContent=z?"Fit":"Zoom";}
+  $("lbZoom").onclick=zoom;$("lbImg").onclick=zoom;
+  $("lbClose").onclick=()=>{lb.hidden=true;};
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!lb.hidden)lb.hidden=true;});
+  $("cuImg").onclick=()=>openLb($("cuImg").src,$("cuCap").textContent);
+
+  // highlights: vertical scroll drives the horizontal track while the section is pinned
+  const pin=$("highlights"),track=$("hlTrack"),dotsEl=$("hlDots");
+  if(pin&&track&&dotsEl){
+    const cards=[...track.children],n=cards.length;
+    const mq=window.matchMedia("(max-width:700px), (prefers-reduced-motion: reduce)");
+    let active=-1;
+    const setDot=k=>{if(k===active)return;active=k;[...dotsEl.children].forEach((d,j)=>d.setAttribute("aria-selected",String(j===k)));};
+    cards.forEach((c,k)=>{const d=document.createElement("button");d.type="button";d.setAttribute("role","tab");d.setAttribute("aria-label","Highlight "+(k+1));
+      d.onclick=()=>{ if(pin.classList.contains("static")){c.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});return;}
+        const total=pin.offsetHeight-pin.firstElementChild.offsetHeight; window.scrollTo({top:pin.getBoundingClientRect().top+window.scrollY+total*(k/(n-1)),behavior:"smooth"}); };
+      dotsEl.appendChild(d);});
+    function frame(){
+      if(pin.classList.contains("static")){return;}
+      const total=pin.offsetHeight-pin.firstElementChild.offsetHeight;
+      const p=Math.min(1,Math.max(0,-pin.getBoundingClientRect().top/Math.max(1,total)));
+      const maxX=Math.max(0,track.scrollWidth-track.parentElement.clientWidth);
+      // each card holds still for a while, then the next one slides in (screen-by-screen feel)
+      const f=p*(n-1),k=Math.min(n-2,Math.floor(f)),t=Math.min(1,f-k),u=Math.max(0,Math.min(1,(t-0.3)/0.55)),e=u*u*(3-2*u);
+      const q=n>1?(k+e)/(n-1):0;
+      track.style.transform="translate3d("+(-q*maxX)+"px,0,0)";
+      setDot(Math.round(q*(n-1)));
+    }
+    function mode(){pin.classList.toggle("static",mq.matches);track.style.transform="";frame();}
+    const view=track.parentElement;
+    view.addEventListener("scroll",()=>{if(!pin.classList.contains("static"))return;const c=view.scrollLeft+view.clientWidth/2;let best=0,bd=1e9;cards.forEach((el,k)=>{const m=el.offsetLeft+el.offsetWidth/2;const dd=Math.abs(m-c);if(dd<bd){bd=dd;best=k;}});setDot(best);},{passive:true});
+    let raf=0;window.addEventListener("scroll",()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;frame();});},{passive:true});
+    window.addEventListener("resize",frame);
+    (mq.addEventListener?mq.addEventListener("change",mode):mq.addListener(mode));
+    mode();setDot(0);
+  }
+  drawCu();drawSch();
+})();
+</script>
+
+</body>
+</html>
